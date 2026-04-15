@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oozora - 家庭教师</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sky-flame: #ff8c00;
+            --sky-glow: rgba(255, 140, 0, 0.4);
+            --storm-flame: #00bfff;
+            --rain-flame: #4169e1;
+            --sun-flame: #ffd700;
+            --lightning-flame: #32cd32;
+            --cloud-flame: #c0c0c0;
+            --mist-flame: #9370db;
+            --bg-dark: #0a0a14;
+            --bg-card: rgba(255, 140, 0, 0.06);
+            --border: rgba(255, 140, 0, 0.15);
+            --text: #e8e0d4;
+            --text-dim: rgba(232, 224, 212, 0.55);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: var(--text);
+            background: var(--bg-dark);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ===== 背景死气之炎粒子 ===== */
+        .flame-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .flame {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: 0;
+            animation: rise linear infinite;
+        }
+        @keyframes rise {
+            0%   { transform: translateY(0) scale(1); opacity: 0; }
+            10%  { opacity: 0.8; }
+            90%  { opacity: 0.3; }
+            100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+        }
+
+        /* ===== 导航 ===== */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+            background: rgba(10, 10, 20, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            font-size: 1.3rem; font-weight: 700;
+            color: var(--sky-flame);
+            letter-spacing: 3px;
+        }
+        .logo small {
+            font-size: 0.65rem; font-weight: 400;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            display: block;
+        }
+        .nav-links { display: flex; list-style: none; gap: 1.8rem; }
+        .nav-links a {
+            color: var(--text-dim); text-decoration: none;
+            font-size: 0.85rem; letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--sky-flame); }
+
+        .menu-btn {
+            display: none; background: none; border: none;
+            cursor: pointer; padding: 4px;
+        }
+        .menu-btn span {
+            display: block; width: 22px; height: 2px;
+            background: var(--text); margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        /* ===== 通用区块 ===== */
+        section {
+            position: relative; z-index: 1;
+            padding: 5rem 2rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .wrap { max-width: 800px; width: 100%; }
+
+        /* ===== Hero ===== */
+        #hero {
+            min-height: 100vh;
+            flex-direction: column; text-align: center;
+            background:
+                radial-gradient(ellipse 600px 400px at 50% 60%, var(--sky-glow), transparent),
+                linear-gradient(180deg, #0a0a14 0%, #1a0e08 100%);
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 0.3rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--sky-flame);
+            letter-spacing: 3px;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 0.8s ease-out;
+        }
+        .hero-name {
+            font-size: clamp(2.8rem, 7vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 0.8rem;
+            animation: fadeUp 0.8s ease-out 0.15s both;
+            color: var(--text);
+        }
+        .hero-name em {
+            font-style: normal;
+            color: var(--sky-flame);
+            text-shadow: 0 0 40px var(--sky-glow);
+        }
+        .hero-quote {
+            font-size: 1.05rem;
+            color: var(--text-dim);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            animation: fadeUp 0.8s ease-out 0.3s both;
+            font-style: italic;
+        }
+        .hero-quote::before { content: '"'; color: var(--sky-flame); font-size: 1.5rem; }
+        .hero-quote::after  { content: '"'; color: var(--sky-flame); font-size: 1.5rem; }
+        .hero-cta {
+            display: inline-block;
+            padding: 0.7rem 2.2rem;
+            border: 1px solid var(--sky-flame);
+            border-radius: 4px;
+            color: var(--sky-flame);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            animation: fadeUp 0.8s ease-out 0.45s both;
+        }
+        .hero-cta:hover {
+            background: var(--sky-flame);
+            color: var(--bg-dark);
+            box-shadow: 0 0 25px var(--sky-glow);
+        }
+        .scroll-hint {
+            position: absolute; bottom: 2rem; left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-dim); font-size: 0.7rem;
+            letter-spacing: 2px;
+            animation: float 2s ease-in-out infinite;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50%      { transform: translateX(-50%) translateY(-8px); }
+        }
+
+        /* ===== 彭格列戒指分隔线 ===== */
+        .ring-divider {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1rem; padding: 3rem 0;
+        }
+        .ring-divider::before, .ring-divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+        .ring {
+            width: 28px; height: 28px;
+            border: 2px solid var(--sky-flame);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            color: var(--sky-flame);
+            box-shadow: 0 0 15px var(--sky-glow);
+        }
+
+        /* ===== 关于 ===== */
+        #about { background: linear-gradient(180deg, #1a0e08 0%, var(--bg-dark) 100%); }
+        .about-title {
+            font-size: 1.6rem; font-weight: 300;
+            text-align: center; margin-bottom: 2.5rem;
+            letter-spacing: 4px;
+        }
+        .about-title span { color: var(--sky-flame); font-weight: 600; }
+        .about-body {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 3rem; align-items: center;
+        }
+        .about-icon {
+            width: 180px; height: 180px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,140,0,0.15), rgba(255,140,0,0.05));
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem;
+            position: relative;
+        }
+        .about-icon::after {
+            content: '';
+            position: absolute; inset: -4px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            border-top-color: var(--sky-flame);
+            animation: spin 4s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .about-text p {
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .about-text p strong { color: var(--text); }
+
+        /* ===== 死气之炎 · 属性 ===== */
+        #flames { background: var(--bg-dark); }
+        .flames-title {
+            font-size: 1.6rem; font-weight: 300;
+            text-align: center; margin-bottom: 0.5rem;
+            letter-spacing: 4px;
+        }
+        .flames-title span { color: var(--sky-flame); font-weight: 600; }
+        .flames-sub {
+            text-align: center; color: var(--text-dim);
+            font-size: 0.85rem; margin-bottom: 2.5rem;
+        }
+        .flames-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+        }
+        .flame-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .flame-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--fc);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .flame-dot {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            margin: 0 auto 0.8rem;
+            box-shadow: 0 0 20px var(--fc);
+        }
+        .flame-card h3 {
+            font-size: 0.95rem; margin-bottom: 0.3rem;
+            color: var(--fc);
+        }
+        .flame-card p {
+            font-size: 0.8rem; color: var(--text-dim);
+        }
+
+        /* ===== 联系 ===== */
+        #contact {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #1a0e08 100%);
+            flex-direction: column; text-align: center;
+        }
+        .contact-title {
+            font-size: 1.6rem; font-weight: 300;
+            letter-spacing: 4px; margin-bottom: 0.5rem;
+        }
+        .contact-title span { color: var(--sky-flame); font-weight: 600; }
+        .contact-sub {
+            color: var(--text-dim); font-size: 0.9rem;
+            margin-bottom: 2rem; font-style: italic;
+        }
+        .contact-links {
+            display: flex; gap: 1rem;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .contact-link {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .contact-link:hover {
+            border-color: var(--sky-flame);
+            color: var(--sky-flame);
+            transform: translateY(-2px);
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            position: relative; z-index: 1;
+            text-align: center; padding: 1.5rem;
+            font-size: 0.75rem; color: var(--text-dim);
+            letter-spacing: 1px;
+            border-top: 1px solid var(--border);
+        }
+        footer span { color: var(--sky-flame); }
+
+        /* ===== 滚动动画 ===== */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: fixed; inset: 0;
+                background: rgba(10,10,20,0.95);
+                flex-direction: column;
+                justify-content: center; align-items: center;
+                gap: 2rem; z-index: 99;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links.open a { font-size: 1.2rem; }
+            .menu-btn { display: block; z-index: 101; }
+            .about-body { grid-template-columns: 1fr; text-align: center; }
+            .about-icon { width: 140px; height: 140px; font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 死气之炎粒子背景 -->
+    <div class="flame-particles" id="particles"></div>
+
+    <!-- 导航 -->
+    <nav>
+        <div class="logo">
+            OOZORA
+            <small>VONGOLA X</small>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#hero" onclick="closeNav()">首页</a></li>
+            <li><a href="#about" onclick="closeNav()">关于</a></li>
+            <li><a href="#flames" onclick="closeNav()">属性</a></li>
+            <li><a href="#contact" onclick="closeNav()">联系</a></li>
+        </ul>
+        <button class="menu-btn" onclick="toggleNav()">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Hero -->
+    <section id="hero">
+        <div class="hero-badge">FAMILY · OOZORA</div>
+        <h1 class="hero-name">Oo<em>zora</em></h1>
+        <p class="hero-quote">我要守护所有人的未来，这就是大空的意志</p>
+        <a href="#about" class="hero-cta">了解更多 →</a>
+        <div class="scroll-hint">SCROLL ↓</div>
+    </section>
+
+    <!-- 关于 -->
+    <section id="about">
+        <div class="wrap">
+            <h2 class="about-title reveal">关于 <span>我</span></h2>
+            <div class="about-body">
+                <div class="reveal">
+                    <div class="about-icon">🔥</div>
+                </div>
+                <div class="about-text reveal">
+                    <p>
+                        你好，我是 <strong>Oozora</strong>。
+                        就像沢田纲吉从一个废柴成长为彭格列十代首领一样，
+                        我也在不断突破自己的极限。
+                    </p>
+                    <p>
+                        大空属性——<strong>调和、包容、指引</strong>。
+                        我相信好的代码就像大空之炎，能够统合一切力量，
+                        将不同的技术融汇为出色的产品。
+                    </p>
+                    <p style="font-size:0.8rem; color: var(--sky-flame); margin-top: 1rem;">
+                        「不会让你死的，我以彭格列十代首领之名起誓！」
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="ring-divider"><div class="ring">◆</div></div>
+
+    <!-- 死气之炎 · 属性 -->
+    <section id="flames">
+        <div class="wrap">
+            <h2 class="flames-title reveal">死气之炎 · <span>属性</span></h2>
+            <p class="flames-sub reveal">我的七大属性技能</p>
+            <div class="flames-grid">
+                <div class="flame-card reveal" style="--fc: #ff8c00;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #ff8c00, #cc5500);"></div>
+                    <h3>大空之炎</h3>
+                    <p>统合全局 · 架构设计</p>
+                </div>
+                <div class="flame-card reveal" style="--fc: #00bfff;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #00bfff, #0080c0);"></div>
+                    <h3>岚之炎</h3>
+                    <p>无所不攻 · 前端开发</p>
+                </div>
+                <div class="flame-card reveal" style="--fc: #4169e1;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #4169e1, #2040a0);"></div>
+                    <h3>雨之炎</h3>
+                    <p>镇定沉稳 · 后端开发</p>
+                </div>
+                <div class="flame-card reveal" style="--fc: #ffd700;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #ffd700, #cc9900);"></div>
+                    <h3>太阳之炎</h3>
+                    <p>积极活跃 · DevOps</p>
+                </div>
+                <div class="flame-card reveal" style="--fc: #32cd32;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #32cd32, #1a8c1a);"></div>
+                    <h3>雷之炎</h3>
+                    <p>硬如钢铁 · 系统架构</p>
+                </div>
+                <div class="flame-card reveal" style="--fc: #c0c0c0;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #c0c0c0, #808080);"></div>
+                    <h3>云之炎</h3>
+                    <p>独立自主 · 技术研究</p>
+                </div>
+                <div class="flame-card reveal" style="--fc: #9370db;">
+                    <div class="flame-dot" style="background: radial-gradient(circle, #9370db, #6040a0);"></div>
+                    <h3>雾之炎</h3>
+                    <p>虚实不定 · UI/UX 设计</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="ring-divider"><div class="ring">◆</div></div>
+
+    <!-- 联系 -->
+    <section id="contact">
+        <div class="wrap">
+            <h2 class="contact-title reveal">联系 <span>我</span></h2>
+            <p class="contact-sub reveal">「如果是为了守护重要的人，我什么都会做」</p>
+            <div class="contact-links reveal">
+                <a href="mailto:oozora_me@163.com" class="contact-link">📧 Email</a>
+                <a href="https://github.com/Oozora-me" class="contact-link">🐙 GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 <span>Oozora</span> · 「轮到我了！」</p>
+    </footer>
+
+    <script>
+        // 生成死气之炎粒子
+        (function() {
+            const container = document.getElementById('particles');
+            const colors = ['#ff8c00', '#00bfff', '#ffd700', '#4169e1', '#32cd32', '#9370db'];
+            for (let i = 0; i < 30; i++) {
+                const f = document.createElement('div');
+                f.className = 'flame';
+                const size = Math.random() * 4 + 2;
+                f.style.cssText = `
+                    width: ${size}px; height: ${size}px;
+                    left: ${Math.random() * 100}%;
+                    bottom: -10px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    animation-duration: ${Math.random() * 8 + 6}s;
+                    animation-delay: ${Math.random() * 10}s;
+                `;
+                container.appendChild(f);
+            }
+        })();
+
+        // 导航
+        function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
+        function closeNav() { document.getElementById('navLinks').classList.remove('open'); }
+
+        // 滚动显示
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const t = document.querySelector(a.getAttribute('href'));
+                if (t) t.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>

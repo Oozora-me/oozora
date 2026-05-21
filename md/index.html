@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bridge Docs</title>
+        <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+        <style>
+            *,
+            *::before,
+            *::after {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --bg: #fafbfc;
+                --bg-sidebar: #f1f3f5;
+                --bg-code: #f6f8fa;
+                --border: #e1e4e8;
+                --text: #24292e;
+                --text-secondary: #586069;
+                --text-muted: #959da5;
+                --accent: #0366d6;
+                --accent-hover: #024ea1;
+                --accent-bg: #f1f8ff;
+                --blockquote-border: #dfe2e5;
+                --blockquote-bg: #f6f8fa;
+                --hr: #e1e4e8;
+                --link: #0366d6;
+                --shadow: rgba(0, 0, 0, 0.08);
+            }
+
+            html {
+                scroll-behavior: smooth;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    "PingFang SC", "Microsoft YaHei", sans-serif;
+                color: var(--text);
+                background: var(--bg);
+                line-height: 1.7;
+                display: flex;
+                min-height: 100vh;
+            }
+
+            /* ===== Sidebar ===== */
+            .sidebar {
+                width: 280px;
+                min-width: 280px;
+                background: var(--bg-sidebar);
+                border-right: 1px solid var(--border);
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                overflow-y: auto;
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .sidebar-header {
+                padding: 1.2rem 1.5rem;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .sidebar-header a {
+                text-decoration: none;
+                color: var(--text);
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .sidebar-logo {
+                width: 28px;
+                height: 28px;
+                border-radius: 6px;
+                background: linear-gradient(135deg, #ff8c00, #cc5500);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                color: white;
+                font-weight: 700;
+            }
+
+            .sidebar-title {
+                font-size: 1rem;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .sidebar-title small {
+                display: block;
+                font-size: 0.7rem;
+                font-weight: 400;
+                color: var(--text-muted);
+                letter-spacing: 0;
+            }
+
+            .sidebar-nav {
+                flex: 1;
+                padding: 1rem 0;
+            }
+
+            .nav-group {
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-group-title {
+                padding: 0.4rem 1.5rem;
+                font-size: 0.7rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: var(--text-muted);
+            }
+
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.45rem 1.5rem;
+                color: var(--text-secondary);
+                text-decoration: none;
+                font-size: 0.875rem;
+                cursor: pointer;
+                transition: all 0.15s;
+                border-left: 3px solid transparent;
+            }
+
+            .nav-item:hover {
+                color: var(--text);
+                background: rgba(0, 0, 0, 0.04);
+            }
+
+            .nav-item.active {
+                color: var(--accent);
+                background: var(--accent-bg);
+                border-left-color: var(--accent);
+                font-weight: 500;
+            }
+
+            .nav-item .nav-label {
+                flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .nav-item .nav-badge {
+                font-size: 0.65rem;
+                padding: 0.1rem 0.4rem;
+                border-radius: 10px;
+                background: rgba(0, 0, 0, 0.06);
+                color: var(--text-muted);
+            }
+
+            /* ===== Mobile sidebar toggle ===== */
+            .sidebar-toggle {
+                display: none;
+                position: fixed;
+                top: 0.8rem;
+                left: 0.8rem;
+                z-index: 20;
+                width: 36px;
+                height: 36px;
+                border-radius: 6px;
+                border: 1px solid var(--border);
+                background: var(--bg);
+                cursor: pointer;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+                box-shadow: 0 2px 8px var(--shadow);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                z-index: 9;
+            }
+
+            /* ===== Main Content ===== */
+            .main {
+                flex: 1;
+                margin-left: 280px;
+                min-height: 100vh;
+            }
+
+            .content-wrapper {
+                max-width: 860px;
+                margin: 0 auto;
+                padding: 3rem 3rem 6rem;
+            }
+
+            /* ===== Breadcrumb ===== */
+            .breadcrumb {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                margin-bottom: 1.5rem;
+                font-size: 0.8rem;
+                color: var(--text-muted);
+            }
+
+            .breadcrumb a {
+                color: var(--text-muted);
+                text-decoration: none;
+                transition: color 0.15s;
+            }
+
+            .breadcrumb a:hover {
+                color: var(--accent);
+            }
+            .breadcrumb .sep {
+                opacity: 0.5;
+            }
+
+            /* ===== Markdown Content ===== */
+            .md-content h1 {
+                font-size: 2rem;
+                font-weight: 700;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid var(--border);
+                margin-bottom: 1.5rem;
+                color: var(--text);
+            }
+
+            .md-content h2 {
+                font-size: 1.4rem;
+                font-weight: 600;
+                padding-bottom: 0.3rem;
+                border-bottom: 1px solid var(--border);
+                margin-top: 2.5rem;
+                margin-bottom: 1rem;
+                color: var(--text);
+            }
+
+            .md-content h3 {
+                font-size: 1.15rem;
+                font-weight: 600;
+                margin-top: 2rem;
+                margin-bottom: 0.8rem;
+                color: var(--text);
+            }
+
+            .md-content h4 {
+                font-size: 1rem;
+                font-weight: 600;
+                margin-top: 1.5rem;
+                margin-bottom: 0.6rem;
+                color: var(--text-secondary);
+            }
+
+            .md-content p {
+                margin-bottom: 1rem;
+                color: var(--text);
+            }
+
+            .md-content a {
+                color: var(--link);
+                text-decoration: none;
+            }
+
+            .md-content a:hover {
+                text-decoration: underline;
+            }
+
+            .md-content strong {
+                font-weight: 600;
+                color: var(--text);
+            }
+
+            .md-content ul,
+            .md-content ol {
+                margin-bottom: 1rem;
+                padding-left: 2rem;
+            }
+
+            .md-content ul {
+                list-style-type: disc;
+            }
+            .md-content ol {
+                list-style-type: decimal;
+            }
+
+            .md-content li {
+                margin-bottom: 0.35rem;
+                color: var(--text);
+            }
+
+            .md-content li > ul,
+            .md-content li > ol {
+                margin-top: 0.3rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .md-content blockquote {
+                border-left: 4px solid var(--blockquote-border);
+                background: var(--blockquote-bg);
+                padding: 0.8rem 1.2rem;
+                margin-bottom: 1rem;
+                border-radius: 0 6px 6px 0;
+                color: var(--text-secondary);
+            }
+
+            .md-content blockquote p:last-child {
+                margin-bottom: 0;
+            }
+
+            .md-content code {
+                background: var(--bg-code);
+                padding: 0.2rem 0.45rem;
+                border-radius: 4px;
+                font-size: 0.85em;
+                font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+                color: var(--text);
+            }
+
+            .md-content pre {
+                background: #282c34;
+                color: #abb2bf;
+                padding: 1.2rem 1.5rem;
+                border-radius: 8px;
+                overflow-x: auto;
+                margin-bottom: 1rem;
+                line-height: 1.5;
+            }
+
+            .md-content pre code {
+                background: none;
+                padding: 0;
+                color: inherit;
+                font-size: 0.875rem;
+            }
+
+            .md-content hr {
+                border: none;
+                height: 1px;
+                background: var(--hr);
+                margin: 2rem 0;
+            }
+
+            .md-content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .md-content th,
+            .md-content td {
+                border: 1px solid var(--border);
+                padding: 0.6rem 1rem;
+                text-align: left;
+            }
+
+            .md-content th {
+                background: var(--bg-sidebar);
+                font-weight: 600;
+            }
+
+            .md-content img {
+                max-width: 100%;
+                border-radius: 6px;
+                margin: 1rem 0;
+            }
+
+            /* ===== TOC (right side) ===== */
+            .toc {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 220px;
+                padding: 3rem 1rem 2rem;
+                overflow-y: auto;
+                max-height: 100vh;
+            }
+
+            .toc-title {
+                font-size: 0.7rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: var(--text-muted);
+                margin-bottom: 0.8rem;
+            }
+
+            .toc-link {
+                display: block;
+                padding: 0.25rem 0.75rem;
+                color: var(--text-muted);
+                text-decoration: none;
+                font-size: 0.78rem;
+                line-height: 1.5;
+                border-left: 2px solid transparent;
+                transition: all 0.15s;
+            }
+
+            .toc-link:hover {
+                color: var(--text-secondary);
+            }
+
+            .toc-link.active {
+                color: var(--accent);
+                border-left-color: var(--accent);
+            }
+
+            .toc-link[data-level="3"] {
+                padding-left: 1.5rem;
+            }
+
+            .toc-link[data-level="4"] {
+                padding-left: 2rem;
+            }
+
+            /* ===== Loading ===== */
+            .loading {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 300px;
+                color: var(--text-muted);
+                font-size: 0.9rem;
+            }
+
+            .loading::after {
+                content: "";
+                width: 18px;
+                height: 18px;
+                border: 2px solid var(--border);
+                border-top-color: var(--accent);
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+                margin-left: 0.6rem;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* ===== Responsive ===== */
+            @media (max-width: 1200px) {
+                .toc {
+                    display: none;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .sidebar {
+                    transform: translateX(-100%);
+                    transition: transform 0.3s ease;
+                }
+
+                .sidebar.open {
+                    transform: translateX(0);
+                }
+
+                .sidebar-toggle {
+                    display: flex;
+                }
+
+                .sidebar-overlay.show {
+                    display: block;
+                }
+
+                .main {
+                    margin-left: 0;
+                }
+
+                .content-wrapper {
+                    padding: 3.5rem 1.5rem 4rem;
+                }
+
+                .md-content h1 {
+                    font-size: 1.6rem;
+                }
+                .md-content h2 {
+                    font-size: 1.25rem;
+                }
+            }
+
+            /* ===== Scrollbar ===== */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: rgba(0, 0, 0, 0.15);
+                border-radius: 3px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(0, 0, 0, 0.25);
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Mobile toggle -->
+        <button
+            class="sidebar-toggle"
+            id="sidebarToggle"
+            aria-label="Toggle menu"
+        >
+            ☰
+        </button>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html">
+                    <div class="sidebar-logo">O</div>
+                    <div class="sidebar-title">
+                        Oozora
+                        <small>Oozora Docs</small>
+                    </div>
+                </a>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav">
+                <!-- Generated by JS -->
+            </nav>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            <div class="content-wrapper">
+                <div class="breadcrumb">
+                    <a href="../index.html">首页</a>
+                    <span class="sep">/</span>
+                    <span id="breadcrumbCurrent">加载中...</span>
+                </div>
+                <div class="md-content" id="mdContent">
+                    <div class="loading">加载中</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- TOC -->
+        <div class="toc" id="toc">
+            <div class="toc-title">目录</div>
+            <div id="tocLinks"></div>
+        </div>
+
+        <script src="https://cdn.bootcdn:.net/ajax/libs/marked/16.3.0/lib/marked.umd.min.js"></script>
+        <script>
+            // ===== Config =====
+            const DOC_GROUPS = [
+                {
+                    title: "Bridge",
+                    files: [
+                        { path: "bridge/00_2_1_GF.md", label: "2/1 GF" },
+                        {
+                            path: "bridge/01_Conventions.md",
+                            label: "Conventions",
+                        },
+                        { path: "bridge/02_Defense.md", label: "Defense" },
+                    ],
+                },
+            ];
+
+            // ===== Sidebar =====
+            function renderSidebar() {
+                const nav = document.getElementById("sidebarNav");
+                let html = "";
+                DOC_GROUPS.forEach((group) => {
+                    html += `<div class="nav-group">`;
+                    html += `<div class="nav-group-title">${group.title}</div>`;
+                    group.files.forEach((file, i) => {
+                        const id = `${group.title}-${i}`;
+                        html += `<a class="nav-item" data-id="${id}" data-path="${file.path}" data-label="${file.label}">`;
+                        html += `<span class="nav-label">${file.label}</span>`;
+                        html += `</a>`;
+                    });
+                    html += `</div>`;
+                });
+                nav.innerHTML = html;
+
+                // Bind click
+                nav.querySelectorAll(".nav-item").forEach((item) => {
+                    item.addEventListener("click", () => {
+                        loadDoc(item.dataset.path, item.dataset.label);
+                        setActiveNav(item);
+                        closeSidebar();
+                    });
+                });
+            }
+
+            function setActiveNav(activeItem) {
+                document
+                    .querySelectorAll(".nav-item")
+                    .forEach((el) => el.classList.remove("active"));
+                if (activeItem) activeItem.classList.add("active");
+            }
+
+            // ===== Mobile sidebar =====
+            function closeSidebar() {
+                document.getElementById("sidebar").classList.remove("open");
+                document
+                    .getElementById("sidebarOverlay")
+                    .classList.remove("show");
+            }
+
+            document
+                .getElementById("sidebarToggle")
+                .addEventListener("click", () => {
+                    document.getElementById("sidebar").classList.toggle("open");
+                    document
+                        .getElementById("sidebarOverlay")
+                        .classList.toggle("show");
+                });
+
+            document
+                .getElementById("sidebarOverlay")
+                .addEventListener("click", closeSidebar);
+
+            // ===== Load & Render MD =====
+            async function loadDoc(path, label) {
+                const content = document.getElementById("mdContent");
+                content.innerHTML = '<div class="loading">加载中</div>';
+                document.getElementById("breadcrumbCurrent").textContent =
+                    label || path;
+                document.title = `${label || "Docs"} - Oozora`;
+
+                // Update URL hash
+                window.location.hash = encodeURIComponent(path);
+
+                try {
+                    const res = await fetch(path);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const md = await res.text();
+                    renderMarkdown(md);
+                } catch (err) {
+                    content.innerHTML = `<p style="color: var(--text-muted);">无法加载文档：<code>${path}</code><br><small>${err.message}</small></p>`;
+                }
+            }
+
+            function renderMarkdown(md) {
+                const content = document.getElementById("mdContent");
+
+                // Configure marked
+                marked.setOptions({
+                    gfm: true,
+                    breaks: false,
+                });
+
+                content.innerHTML = marked.parse(md);
+
+                // Make links open in new tab
+                content.querySelectorAll("a").forEach((a) => {
+                    if (a.href.startsWith("http")) {
+                        a.target = "_blank";
+                        a.rel = "noopener noreferrer";
+                    }
+                });
+
+                // Build TOC
+                buildToc(content);
+            }
+
+            // ===== TOC =====
+            function buildToc(container) {
+                const tocLinks = document.getElementById("tocLinks");
+                const headings = container.querySelectorAll("h2, h3, h4");
+                tocLinks.innerHTML = "";
+
+                headings.forEach((h, i) => {
+                    if (!h.id) h.id = `heading-${i}`;
+                    const a = document.createElement("a");
+                    a.className = "toc-link";
+                    a.href = `#${h.id}`;
+                    a.textContent = h.textContent;
+                    a.dataset.level = h.tagName.replace("H", "");
+                    tocLinks.appendChild(a);
+                });
+
+                // Highlight active on scroll
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            const link = tocLinks.querySelector(
+                                `a[href="#${entry.target.id}"]`,
+                            );
+                            if (link) {
+                                if (entry.isIntersecting) {
+                                    tocLinks
+                                        .querySelectorAll(".toc-link")
+                                        .forEach((l) =>
+                                            l.classList.remove("active"),
+                                        );
+                                    link.classList.add("active");
+                                }
+                            }
+                        });
+                    },
+                    { rootMargin: "-80px 0px -70% 0px", threshold: 0 },
+                );
+
+                headings.forEach((h) => observer.observe(h));
+            }
+
+            // ===== Init =====
+            renderSidebar();
+
+            // Load from hash or first doc
+            const hash = decodeURIComponent(window.location.hash.slice(1));
+            if (hash) {
+                const navItem = document.querySelector(
+                    `.nav-item[data-path="${hash}"]`,
+                );
+                if (navItem) {
+                    loadDoc(navItem.dataset.path, navItem.dataset.label);
+                    setActiveNav(navItem);
+                } else {
+                    loadDoc(
+                        DOC_GROUPS[0].files[0].path,
+                        DOC_GROUPS[0].files[0].label,
+                    );
+                    setActiveNav(document.querySelector(".nav-item"));
+                }
+            } else {
+                loadDoc(
+                    DOC_GROUPS[0].files[0].path,
+                    DOC_GROUPS[0].files[0].label,
+                );
+                setActiveNav(document.querySelector(".nav-item"));
+            }
+
+            // Hash change
+            window.addEventListener("hashchange", () => {
+                const h = decodeURIComponent(window.location.hash.slice(1));
+                const navItem = document.querySelector(
+                    `.nav-item[data-path="${h}"]`,
+                );
+                if (navItem) {
+                    loadDoc(navItem.dataset.path, navItem.dataset.label);
+                    setActiveNav(navItem);
+                }
+            });
+        </script>
+    </body>
+</html>

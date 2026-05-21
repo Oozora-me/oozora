@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- 三叉戟 - 六道骸 -->
+  <defs>
+    <linearGradient id="trident" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c0c0c0"/>
+      <stop offset="40%" stop-color="#e8e8e8"/>
+      <stop offset="100%" stop-color="#808080"/>
+    </linearGradient>
+    <filter id="gl"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#4b0082" stroke-width="1" opacity="0.2"/>
+  <g transform="translate(100,100)" filter="url(#gl)">
+    <!-- 主杆 -->
+    <rect x="-3" y="-70" width="6" height="140" rx="2" fill="url(#trident)"/>
+    <!-- 高光 -->
+    <rect x="-1" y="-68" width="1.5" height="135" rx="0.75" fill="#fff" opacity="0.3"/>
+    <!-- 左叉 -->
+    <path d="M-3,-65 Q-30,-70 -32,-85 Q-33,-95 -25,-98 Q-18,-95 -18,-85 Q-17,-75 -3,-65" fill="url(#trident)" stroke="#a0a0a0" stroke-width="0.5"/>
+    <!-- 右叉 -->
+    <path d="M3,-65 Q30,-70 32,-85 Q33,-95 25,-98 Q18,-95 18,-85 Q17,-75 3,-65" fill="url(#trident)" stroke="#a0a0a0" stroke-width="0.5"/>
+    <!-- 中叉尖端 -->
+    <polygon points="-3,-70 3,-70 0,-90" fill="#e0e0e0"/>
+    <!-- 左叉尖端 -->
+    <polygon points="-28,-95 -22,-95 -25,-105" fill="#e0e0e0"/>
+    <!-- 右叉尖端 -->
+    <polygon points="22,-95 28,-95 25,-105" fill="#e0e0e0"/>
+    <!-- 握柄 -->
+    <rect x="-5" y="40" width="10" height="30" rx="3" fill="#2a1a3a"/>
+    <line x1="-5" y1="47" x2="5" y2="47" stroke="#4b0082" stroke-width="0.8" opacity="0.5"/>
+    <line x1="-5" y1="53" x2="5" y2="53" stroke="#4b0082" stroke-width="0.8" opacity="0.5"/>
+    <line x1="-5" y1="59" x2="5" y2="59" stroke="#4b0082" stroke-width="0.8" opacity="0.5"/>
+  </g>
+  <!-- 雾之炎粒子 -->
+  <circle cx="50" cy="48" r="3" fill="#4b0082" opacity="0.6"/>
+  <circle cx="152" cy="50" r="2" fill="#7b4fb5" opacity="0.5"/>
+  <circle cx="45" cy="155" r="2.5" fill="#4b0082" opacity="0.4"/>
+  <!-- 迷雾效果 -->
+  <ellipse cx="100" cy="170" rx="40" ry="8" fill="#4b0082" opacity="0.06"/>
+  <ellipse cx="60" cy="175" rx="25" ry="5" fill="#4b0082" opacity="0.04"/>
+  <!-- 轮回之眼 -->
+  <circle cx="155" cy="40" r="6" fill="none" stroke="#4b0082" stroke-width="1" opacity="0.3"/>
+  <circle cx="155" cy="40" r="2" fill="#4b0082" opacity="0.3"/>
+</svg>

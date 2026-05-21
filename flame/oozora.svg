@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- 彭格列手套 - 沢田纲吉 -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff8c00"/>
+      <stop offset="100%" stop-color="#cc5500"/>
+    </linearGradient>
+    <filter id="gl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <!-- 光晕 -->
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#ff8c00" stroke-width="1" opacity="0.2"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="#ff8c00" stroke-width="0.5" opacity="0.1"/>
+  <!-- 手套主体 -->
+  <g transform="translate(100,105)" filter="url(#gl)">
+    <!-- 手掌 -->
+    <rect x="-30" y="-15" width="60" height="55" rx="12" fill="url(#g)" opacity="0.9"/>
+    <!-- 大拇指 -->
+    <rect x="-38" y="-10" width="18" height="35" rx="9" fill="url(#g)" opacity="0.85" transform="rotate(-15,-29,7)"/>
+    <!-- 四指 -->
+    <rect x="-24" y="-45" width="12" height="35" rx="6" fill="url(#g)" opacity="0.85"/>
+    <rect x="-8" y="-50" width="12" height="38" rx="6" fill="url(#g)" opacity="0.9"/>
+    <rect x="8" y="-48" width="12" height="36" rx="6" fill="url(#g)" opacity="0.85"/>
+    <rect x="22" y="-40" width="12" height="30" rx="6" fill="url(#g)" opacity="0.8"/>
+    <!-- X 标记 -->
+    <line x1="-12" y1="5" x2="12" y2="25" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+    <line x1="12" y1="5" x2="-12" y2="25" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+  </g>
+  <!-- 火焰粒子 -->
+  <circle cx="55" cy="50" r="3" fill="#ff8c00" opacity="0.6"/>
+  <circle cx="150" cy="40" r="2" fill="#ffd700" opacity="0.5"/>
+  <circle cx="40" cy="140" r="2.5" fill="#ff8c00" opacity="0.4"/>
+  <circle cx="160" cy="150" r="2" fill="#ffd700" opacity="0.5"/>
+</svg>

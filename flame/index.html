@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用色环打开 · 死气之炎</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent: #ff8c00;
+            --accent-glow: rgba(255, 140, 0, 0.4);
+            --accent-dim: rgba(255, 140, 0, 0.15);
+            --bg: #0a0a14;
+            --text: #e8e0d4;
+            --text-dim: rgba(232, 224, 212, 0.55);
+            --speed: 0.6s;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background var(--speed) ease;
+        }
+
+        /* ===== 粒子 ===== */
+        .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .particle {
+            position: absolute; border-radius: 50%; filter: blur(1px); opacity: 0;
+            animation: rise linear infinite;
+        }
+        @keyframes rise {
+            0%   { transform: translateY(0) scale(1); opacity: 0; }
+            10%  { opacity: 0.7; }
+            90%  { opacity: 0.2; }
+            100% { transform: translateY(-100vh) scale(0.2); opacity: 0; }
+        }
+
+        /* ===== 闪光 ===== */
+        .flash {
+            position: fixed; inset: 0; background: var(--accent);
+            opacity: 0; pointer-events: none; z-index: 100;
+            transition: opacity 0.15s ease;
+        }
+        .flash.active { opacity: 0.2; }
+
+        /* ===== 页面 ===== */
+        .page {
+            position: relative; z-index: 1;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 2rem; gap: 1.5rem;
+        }
+
+        /* ===== 标题 ===== */
+        .title { text-align: center; animation: fadeUp 0.8s ease-out; }
+        .title h1 {
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 300; letter-spacing: 4px; margin-bottom: 0.4rem;
+        }
+        .title h1 span {
+            color: var(--accent); font-weight: 700;
+            transition: color var(--speed) ease;
+        }
+        .title p { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; }
+
+        /* ===== 主内容 ===== */
+        .main-content {
+            display: flex; align-items: center; gap: 2.5rem;
+            animation: fadeUp 0.8s ease-out 0.2s both;
+            flex-wrap: wrap; justify-content: center;
+        }
+
+        /* ===== 色环 ===== */
+        .ring-container {
+            position: relative;
+            width: clamp(240px, 36vw, 320px);
+            height: clamp(240px, 36vw, 320px);
+            flex-shrink: 0;
+        }
+        .ring-outer {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 2px solid var(--accent-dim);
+            transition: border-color var(--speed) ease;
+            animation: spin-slow 30s linear infinite;
+        }
+        .ring-outer::before {
+            content: ''; position: absolute; inset: -8px;
+            border-radius: 50%; border: 1px dashed rgba(255,255,255,0.06);
+        }
+        @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+        .color-ring {
+            position: absolute; inset: 20px; border-radius: 50%;
+            background: conic-gradient(
+                #ff8c00 0deg, #e63946 51deg, #4169e1 103deg,
+                #ffd700 154deg, #32cd32 206deg, #9370db 257deg,
+                #4b0082 309deg, #ff8c00 360deg
+            );
+            cursor: pointer; transition: transform 0.3s ease;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+        .color-ring:hover { transform: scale(1.03); }
+
+        .ring-highlight {
+            position: absolute; inset: 18px; border-radius: 50%;
+            pointer-events: none; transition: opacity 0.4s ease; opacity: 0;
+        }
+        .ring-highlight.active { opacity: 1; }
+
+        .ring-center {
+            position: absolute; inset: 55px; border-radius: 50%;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+            transition: background var(--speed) ease;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .ring-center::before {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+            opacity: 0.3; transition: background var(--speed) ease;
+        }
+        .center-icon {
+            font-size: 2.5rem; position: relative; z-index: 1;
+            transition: transform 0.4s ease;
+        }
+        .center-name {
+            font-size: 1rem; font-weight: 700; letter-spacing: 3px;
+            margin-top: 0.2rem; color: var(--accent);
+            position: relative; z-index: 1;
+            transition: color var(--speed) ease;
+        }
+        .center-sub {
+            font-size: 0.65rem; color: var(--text-dim);
+            letter-spacing: 2px; position: relative; z-index: 1; margin-top: 0.1rem;
+        }
+
+        /* ===== 角色展示区 ===== */
+        .character-panel {
+            display: flex; flex-direction: column; align-items: center; gap: 1rem;
+        }
+
+        /* 双图对照容器 */
+        .duo-display {
+            display: flex; gap: 0.8rem; align-items: stretch;
+        }
+        .duo-frame {
+            position: relative;
+            width: clamp(140px, 18vw, 200px);
+            aspect-ratio: 3/4;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--accent-dim);
+            transition: border-color var(--speed) ease, box-shadow var(--speed) ease;
+        }
+        .duo-frame.line-art {
+            box-shadow: 0 0 30px rgba(0,0,0,0.4);
+        }
+        .duo-frame.colored {
+            box-shadow: 0 0 30px rgba(0,0,0,0.4), 0 0 20px var(--accent-glow);
+        }
+        .duo-frame::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, transparent 40%, var(--bg) 100%);
+            pointer-events: none; z-index: 1;
+        }
+        .duo-frame img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s ease, opacity 0.4s ease, filter 0.6s ease;
+        }
+        .duo-frame img.switching {
+            opacity: 0; transform: scale(1.08);
+        }
+
+        /* 线稿图标签 */
+        .frame-label {
+            position: absolute; bottom: 0.5rem; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem; letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+            background: rgba(0,0,0,0.5);
+            padding: 0.15rem 0.6rem; border-radius: 10px;
+            z-index: 2; white-space: nowrap;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 中间箭头 */
+        .duo-arrow {
+            display: flex; align-items: center;
+            font-size: 1.2rem; color: var(--accent);
+            transition: color var(--speed) ease, transform 0.4s ease;
+            animation: arrowPulse 2s ease-in-out infinite;
+        }
+        @keyframes arrowPulse {
+            0%, 100% { transform: translateX(0); opacity: 0.6; }
+            50% { transform: translateX(4px); opacity: 1; }
+        }
+
+        /* 角色信息 */
+        .character-label { text-align: center; }
+        .character-label .flame-name {
+            font-size: 1.3rem; font-weight: 700;
+            color: var(--accent); letter-spacing: 3px;
+            transition: color var(--speed) ease;
+        }
+        .character-label .flame-en {
+            font-size: 0.7rem; color: var(--text-dim);
+            letter-spacing: 4px; text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+        .character-label .flame-desc {
+            font-size: 0.85rem; color: var(--text-dim);
+            line-height: 1.7; margin-top: 0.8rem;
+            max-width: 440px;
+        }
+        .character-label .flame-traits {
+            display: flex; gap: 0.6rem; margin-top: 0.8rem;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .trait-tag {
+            padding: 0.25rem 0.8rem; border-radius: 20px;
+            font-size: 0.7rem;
+            border: 1px solid var(--accent-dim);
+            color: var(--accent);
+            transition: all var(--speed) ease;
+        }
+
+        /* ===== 底部 ===== */
+        .hint {
+            font-size: 0.7rem; color: var(--text-dim);
+            letter-spacing: 2px;
+            animation: fadeUp 0.8s ease-out 0.6s both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 900px) {
+            .main-content { flex-direction: column; gap: 1.5rem; }
+            .duo-frame { width: clamp(120px, 35vw, 160px); }
+        }
+        @media (max-width: 480px) {
+            .ring-container { width: 220px; height: 220px; }
+            .ring-center { inset: 45px; }
+            .center-icon { font-size: 2rem; }
+            .duo-frame { width: 130px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+    <div class="flash" id="flash"></div>
+
+    <div class="page">
+        <div class="title">
+            <h1>用色环打开 · <span id="titleAccent">死气之炎</span></h1>
+            <p>选择你的属性</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 色环 -->
+            <div class="ring-container">
+                <div class="ring-outer"></div>
+                <div class="color-ring" id="colorRing"></div>
+                <div class="ring-highlight active" id="ringHighlight"></div>
+                <div class="ring-center">
+                    <div class="center-icon" id="centerIcon">🔥</div>
+                    <div class="center-name" id="centerName">大空</div>
+                    <div class="center-sub" id="centerSub">SKY</div>
+                </div>
+            </div>
+
+            <!-- 角色展示 -->
+            <div class="character-panel">
+                <div class="duo-display">
+                    <!-- 线稿 -->
+                    <div class="duo-frame line-art">
+                        <img id="lineImg" src="oozora_line.jpg" alt="line art">
+                        <span class="frame-label">LINE ART</span>
+                    </div>
+                    <!-- 箭头 -->
+                    <div class="duo-arrow" id="duoArrow">▸</div>
+                    <!-- 彩图 -->
+                    <div class="duo-frame colored">
+                        <img id="colorImg" src="oozora.jpg" alt="colored">
+                        <span class="frame-label" id="colorLabel">COLORED</span>
+                    </div>
+                </div>
+                <div class="character-label">
+                    <div class="flame-name" id="flameName">大空之炎</div>
+                    <div class="flame-en" id="flameEn">DYING WILL FLAME OF THE SKY</div>
+                    <div class="flame-desc" id="flameDesc">
+                        大空——调和、包容、指引。能够统合所有属性的火焰，彭格列历代首领的象征。沢田纲吉以此为力量，守护着同伴与未来。
+                    </div>
+                    <div class="flame-traits" id="flameTraits">
+                        <span class="trait-tag">调和</span>
+                        <span class="trait-tag">包容</span>
+                        <span class="trait-tag">指引</span>
+                        <span class="trait-tag">首领</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="hint">点击色环切换属性 · 方向键 ← → 快速切换</p>
+    </div>
+
+    <script>
+        const flames = [
+            {
+                name: '大空', en: 'SKY', fullName: '大空之炎',
+                fullEn: 'DYING WILL FLAME OF THE SKY',
+                color: '#ff8c00',
+                glow: 'rgba(255,140,0,0.4)', dim: 'rgba(255,140,0,0.15)',
+                bg: '#0a0a14',
+                icon: '🔥', img: 'oozora.jpg', line: 'oozora_line.jpg',
+                desc: '大空——调和、包容、指引。能够统合所有属性的火焰，彭格列历代首领的象征。沢田纲吉以此为力量，守护着同伴与未来。',
+                traits: ['调和', '包容', '指引', '首领']
+            },
+            {
+                name: '岚', en: 'STORM', fullName: '岚之炎',
+                fullEn: 'DYING WILL FLAME OF THE STORM',
+                color: '#e63946',
+                glow: 'rgba(230,57,70,0.4)', dim: 'rgba(230,57,70,0.15)',
+                bg: '#140808',
+                icon: '🌪️', img: 'storm.jpg', line: 'storm_line.jpg',
+                desc: '岚——无所不攻、不断分解。拥有腐蚀一切的破坏力，山本武以此为剑，将一切阻碍化为虚无。',
+                traits: ['分解', '攻击', '破坏', '剑士']
+            },
+            {
+                name: '雨', en: 'RAIN', fullName: '雨之炎',
+                fullEn: 'DYING WILL FLAME OF THE RAIN',
+                color: '#4169e1',
+                glow: 'rgba(65,105,225,0.4)', dim: 'rgba(65,105,225,0.15)',
+                bg: '#080a18',
+                icon: '💧', img: 'rain.jpg', line: 'rain_line.jpg',
+                desc: '雨——镇定、沉稳、洗涤。能够平息一切战斗的火焰，狱寺隼人以此为盾，在暴风雨中守护同伴。',
+                traits: ['镇定', '洗涤', '守护', '忠诚']
+            },
+            {
+                name: '晴', en: 'SUN', fullName: '晴之炎',
+                fullEn: 'DYING WILL FLAME OF THE SUN',
+                color: '#ffd700',
+                glow: 'rgba(255,215,0,0.4)', dim: 'rgba(255,215,0,0.15)',
+                bg: '#141008',
+                icon: '☀️', img: 'sun.jpg', line: 'sun_line.jpg',
+                desc: '晴——活跃、积极、治愈。拥有活化一切的能力，笹川了平以此为拳，永远做最热血的男人。',
+                traits: ['活跃', '治愈', '拳击', '热血']
+            },
+            {
+                name: '雷', en: 'LIGHTNING', fullName: '雷之炎',
+                fullEn: 'DYING WILL FLAME OF THE LIGHTNING',
+                color: '#32cd32',
+                glow: 'rgba(50,205,50,0.4)', dim: 'rgba(50,205,50,0.15)',
+                bg: '#080e08',
+                icon: '⚡', img: 'lightning.jpg', line: 'lightning_line.jpg',
+                desc: '雷——硬如钢铁、坚不可摧。拥有最强的硬度和防御力，蓝波以此为盾，天真却可靠地守护大家。',
+                traits: ['钢铁', '防御', '电击', '天真']
+            },
+            {
+                name: '云', en: 'CLOUD', fullName: '云之炎',
+                fullEn: 'DYING WILL FLAME OF THE CLOUD',
+                color: '#9370db',
+                glow: 'rgba(147,112,219,0.4)', dim: 'rgba(147,112,219,0.15)',
+                bg: '#0e0a14',
+                icon: '☁️', img: 'cloud.jpg', line: 'cloud_line.jpg',
+                desc: '云——独立、自主、不被束缚。无法被囚禁的浮云，云雀恭弥以此为刃，浮云从不被任何事物束缚。',
+                traits: ['独立', '自主', '浮云', '咬杀']
+            },
+            {
+                name: '雾', en: 'MIST', fullName: '雾之炎',
+                fullEn: 'DYING WILL FLAME OF THE MIST',
+                color: '#4b0082',
+                glow: 'rgba(75,0,130,0.4)', dim: 'rgba(75,0,130,0.15)',
+                bg: '#0a0610',
+                icon: '🔮', img: 'mist.jpg', line: 'mist_line.jpg',
+                desc: '雾——虚实不定、无法捉摸。能够创造幻象的火焰，六道骸以此为术，在迷雾中操控一切。',
+                traits: ['幻术', '虚实', '轮回', '迷惑']
+            }
+        ];
+
+        let current = 0;
+
+        function switchFlame(index) {
+            if (index === current) return;
+            current = index;
+            const f = flames[index];
+            const root = document.documentElement;
+
+            // 闪光
+            const flash = document.getElementById('flash');
+            flash.style.background = f.color;
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 200);
+
+            // CSS 变量
+            root.style.setProperty('--accent', f.color);
+            root.style.setProperty('--accent-glow', f.glow);
+            root.style.setProperty('--accent-dim', f.dim);
+            root.style.setProperty('--bg', f.bg);
+            document.body.style.background = f.bg;
+
+            // 中心图标
+            const icon = document.getElementById('centerIcon');
+            icon.style.transform = 'scale(0.5) rotate(-20deg)';
+            setTimeout(() => {
+                icon.textContent = f.icon;
+                icon.style.transform = 'scale(1) rotate(0deg)';
+            }, 200);
+            document.getElementById('centerName').textContent = f.name;
+            document.getElementById('centerSub').textContent = f.en;
+
+            // 双图切换 - 线稿先切
+            const lineImg = document.getElementById('lineImg');
+            const colorImg = document.getElementById('colorImg');
+            lineImg.classList.add('switching');
+            setTimeout(() => {
+                lineImg.src = f.line;
+                lineImg.onload = () => lineImg.classList.remove('switching');
+            }, 300);
+
+            // 彩图延迟切换，形成"着色"效果
+            setTimeout(() => {
+                colorImg.classList.add('switching');
+                setTimeout(() => {
+                    colorImg.src = f.img;
+                    colorImg.onload = () => colorImg.classList.remove('switching');
+                }, 300);
+            }, 150);
+
+            // 信息
+            document.getElementById('flameName').textContent = f.fullName;
+            document.getElementById('flameEn').textContent = f.fullEn;
+            document.getElementById('flameDesc').textContent = f.desc;
+            document.getElementById('flameTraits').innerHTML =
+                f.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+            document.getElementById('titleAccent').textContent = f.fullName;
+
+            // 粒子
+            document.querySelectorAll('.particle').forEach(p => {
+                p.style.background = f.color;
+            });
+
+            // 色环高亮
+            updateRingHighlight(index);
+        }
+
+        function updateRingHighlight(index) {
+            const el = document.getElementById('ringHighlight');
+            const segSize = 360 / 7;
+            const start = index * segSize;
+            const end = (index + 1) * segSize;
+            const pad = 2;
+            const c = flames[index].color;
+            el.style.background = `conic-gradient(
+                transparent 0deg, transparent ${start + pad}deg,
+                ${c} ${start + pad}deg, ${c} ${end - pad}deg,
+                transparent ${end - pad}deg, transparent 360deg
+            )`;
+            el.style.boxShadow = `0 0 20px ${flames[index].glow}, inset 0 0 15px ${flames[index].glow}`;
+        }
+
+        updateRingHighlight(0);
+
+        // 色环点击
+        document.getElementById('colorRing').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            let angle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI + 90;
+            if (angle < 0) angle += 360;
+            if (angle >= 360) angle -= 360;
+            switchFlame(Math.floor(angle / (360 / 7)));
+        });
+
+        // 粒子
+        (function() {
+            const c = document.getElementById('particles');
+            for (let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const s = Math.random() * 3 + 1;
+                p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:-10px;background:${flames[0].color};animation-duration:${Math.random()*8+6}s;animation-delay:${Math.random()*10}s;`;
+                c.appendChild(p);
+            }
+        })();
+
+        // 键盘
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') switchFlame((current + 1) % 7);
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') switchFlame((current + 6) % 7);
+        });
+    </script>
+</body>
+</html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oozora - 家庭教师</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -246,6 +247,13 @@
             text-align: center; color: var(--text-dim);
             font-size: 0.85rem; margin-bottom: 2.5rem;
         }
+        .flames-sub a {
+            color: var(--sky-flame);
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: opacity 0.3s;
+        }
+        .flames-sub a:hover { opacity: 0.7; }
         .flames-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -411,7 +419,7 @@
     <section id="flames">
         <div class="wrap">
             <h2 class="flames-title reveal">死气之炎 · <span>属性</span></h2>
-            <p class="flames-sub reveal">我的七大属性技能</p>
+            <p class="flames-sub reveal">我的七大属性技能 · <a href="./flame/index.html">用色环打开 →</a></p>
             <div class="flames-grid">
                 <div class="flame-card reveal" style="--fc: #ff8c00;">
                     <div class="flame-dot" style="background: radial-gradient(circle, #ff8c00, #cc5500);"></div>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- 时雨苍燕流太刀 - 山本武 -->
+  <defs>
+    <linearGradient id="blade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c0c0c0"/>
+      <stop offset="50%" stop-color="#f0f0f0"/>
+      <stop offset="100%" stop-color="#a0a0a0"/>
+    </linearGradient>
+    <linearGradient id="wrap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e63946"/>
+      <stop offset="100%" stop-color="#a01020"/>
+    </linearGradient>
+    <filter id="gl"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#e63946" stroke-width="1" opacity="0.2"/>
+  <g transform="translate(100,100) rotate(-30)" filter="url(#gl)">
+    <!-- 刀身 -->
+    <rect x="-5" y="-80" width="10" height="120" rx="2" fill="url(#blade)"/>
+    <!-- 刀尖 -->
+    <polygon points="-5,-80 5,-80 0,-95" fill="#e0e0e0"/>
+    <!-- 刀刃高光 -->
+    <rect x="-2" y="-78" width="2" height="115" rx="1" fill="#fff" opacity="0.4"/>
+    <!-- 柄缠绕 -->
+    <rect x="-7" y="40" width="14" height="40" rx="3" fill="url(#wrap)"/>
+    <!-- 柄缠绕纹理 -->
+    <line x1="-7" y1="48" x2="7" y2="48" stroke="#a01020" stroke-width="1" opacity="0.5"/>
+    <line x1="-7" y1="56" x2="7" y2="56" stroke="#a01020" stroke-width="1" opacity="0.5"/>
+    <line x1="-7" y1="64" x2="7" y2="64" stroke="#a01020" stroke-width="1" opacity="0.5"/>
+    <line x1="-7" y1="72" x2="7" y2="72" stroke="#a01020" stroke-width="1" opacity="0.5"/>
+    <!-- 镡（护手） -->
+    <rect x="-18" y="36" width="36" height="6" rx="2" fill="#8B7355"/>
+    <circle cx="0" cy="39" r="4" fill="#6B5335" stroke="#8B7355" stroke-width="1"/>
+  </g>
+  <!-- 岚之炎粒子 -->
+  <circle cx="50" cy="45" r="3" fill="#e63946" opacity="0.6"/>
+  <circle cx="155" cy="55" r="2" fill="#ff6b6b" opacity="0.5"/>
+  <circle cx="45" cy="155" r="2.5" fill="#e63946" opacity="0.4"/>
+</svg>

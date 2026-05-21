@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- 拳击手套 - 笹川了平 -->
+  <defs>
+    <linearGradient id="glove" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d0d0d0"/>
+    </linearGradient>
+    <filter id="gl"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#ffd700" stroke-width="1" opacity="0.2"/>
+  <g filter="url(#gl)">
+    <!-- 左拳 -->
+    <g transform="translate(65,110)">
+      <ellipse cx="0" cy="0" rx="30" ry="25" fill="url(#glove)"/>
+      <ellipse cx="0" cy="-5" rx="22" ry="15" fill="#e8e8e8"/>
+      <!-- 拇指 -->
+      <ellipse cx="-25" cy="-8" rx="10" ry="8" fill="url(#glove)" transform="rotate(-20,-25,-8)"/>
+      <!-- 绷带 -->
+      <path d="M-10,-20 Q0,-30 10,-20" stroke="#ccc" stroke-width="2" fill="none"/>
+      <path d="M-15,-15 Q0,-28 15,-15" stroke="#ddd" stroke-width="1.5" fill="none"/>
+      <!-- 手腕绷带 -->
+      <rect x="-15" y="18" width="30" height="20" rx="5" fill="#f5f5f5"/>
+      <line x1="-12" y1="22" x2="12" y2="22" stroke="#ddd" stroke-width="1"/>
+      <line x1="-12" y1="27" x2="12" y2="27" stroke="#ddd" stroke-width="1"/>
+      <line x1="-12" y1="32" x2="12" y2="32" stroke="#ddd" stroke-width="1"/>
+    </g>
+    <!-- 右拳 -->
+    <g transform="translate(135,100)">
+      <ellipse cx="0" cy="0" rx="30" ry="25" fill="url(#glove)"/>
+      <ellipse cx="0" cy="-5" rx="22" ry="15" fill="#e8e8e8"/>
+      <ellipse cx="25" cy="-8" rx="10" ry="8" fill="url(#glove)" transform="rotate(20,25,-8)"/>
+      <path d="M-10,-20 Q0,-30 10,-20" stroke="#ccc" stroke-width="2" fill="none"/>
+      <path d="M-15,-15 Q0,-28 15,-15" stroke="#ddd" stroke-width="1.5" fill="none"/>
+      <rect x="-15" y="18" width="30" height="20" rx="5" fill="#f5f5f5"/>
+      <line x1="-12" y1="22" x2="12" y2="22" stroke="#ddd" stroke-width="1"/>
+      <line x1="-12" y1="27" x2="12" y2="27" stroke="#ddd" stroke-width="1"/>
+      <line x1="-12" y1="32" x2="12" y2="32" stroke="#ddd" stroke-width="1"/>
+    </g>
+  </g>
+  <!-- 晴之炎粒子 -->
+  <circle cx="50" cy="50" r="3" fill="#ffd700" opacity="0.6"/>
+  <circle cx="150" cy="45" r="2" fill="#ffe066" opacity="0.5"/>
+  <circle cx="45" cy="155" r="2.5" fill="#ffd700" opacity="0.4"/>
+</svg>

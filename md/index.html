@@ -124,6 +124,54 @@
                 color: var(--text-muted);
             }
 
+            .nav-folder {
+                margin-bottom: 0.2rem;
+            }
+
+            .nav-folder-header {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.4rem 1.5rem;
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.15s;
+                border-left: 3px solid transparent;
+                user-select: none;
+            }
+
+            .nav-folder-header:hover {
+                color: var(--text);
+                background: rgba(0, 0, 0, 0.04);
+            }
+
+            .nav-folder-header .arrow {
+                font-size: 0.7rem;
+                transition: transform 0.2s;
+                color: var(--text-muted);
+            }
+
+            .nav-folder-header.expanded .arrow {
+                transform: rotate(90deg);
+            }
+
+            .nav-folder-children {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.25s ease;
+            }
+
+            .nav-folder-children.expanded {
+                max-height: 500px;
+            }
+
+            .nav-folder-children .nav-item {
+                padding-left: 2.8rem;
+                font-size: 0.82rem;
+                color: var(--text-muted);
+            }
+
             .nav-item {
                 display: flex;
                 align-items: center;
@@ -539,9 +587,7 @@
         <!-- Main -->
         <main class="main">
             <div class="content-wrapper">
-                <div class="breadcrumb">
-                    <a href="../index.html">首页</a>
-                    <span class="sep">/</span>
+                <div class="breadcrumb" id="breadcrumb">
                     <span id="breadcrumbCurrent">加载中...</span>
                 </div>
                 <div class="md-content" id="mdContent">
@@ -557,200 +603,9 @@
         </div>
 
         <script src="https://cdn.bootcdn.net/ajax/libs/marked/16.3.0/lib/marked.umd.min.js"></script>
-        <script>
-            // ===== Config =====
-            const DOC_GROUPS = [
-                {
-                    title: "Bridge",
-                    files: [
-                        { path: "bridge/00_2_1_GF.md", label: "2/1 GF" },
-                        {
-                            path: "bridge/01_Conventions.md",
-                            label: "Conventions",
-                        },
-                        { path: "bridge/02_Defense.md", label: "Defense" },
-                    ],
-                },
-            ];
-
-            // ===== Sidebar =====
-            function renderSidebar() {
-                const nav = document.getElementById("sidebarNav");
-                let html = "";
-                DOC_GROUPS.forEach((group) => {
-                    html += `<div class="nav-group">`;
-                    html += `<div class="nav-group-title">${group.title}</div>`;
-                    group.files.forEach((file, i) => {
-                        const id = `${group.title}-${i}`;
-                        html += `<a class="nav-item" data-id="${id}" data-path="${file.path}" data-label="${file.label}">`;
-                        html += `<span class="nav-label">${file.label}</span>`;
-                        html += `</a>`;
-                    });
-                    html += `</div>`;
-                });
-                nav.innerHTML = html;
-
-                // Bind click
-                nav.querySelectorAll(".nav-item").forEach((item) => {
-                    item.addEventListener("click", () => {
-                        loadDoc(item.dataset.path, item.dataset.label);
-                        setActiveNav(item);
-                        closeSidebar();
-                    });
-                });
-            }
-
-            function setActiveNav(activeItem) {
-                document
-                    .querySelectorAll(".nav-item")
-                    .forEach((el) => el.classList.remove("active"));
-                if (activeItem) activeItem.classList.add("active");
-            }
-
-            // ===== Mobile sidebar =====
-            function closeSidebar() {
-                document.getElementById("sidebar").classList.remove("open");
-                document
-                    .getElementById("sidebarOverlay")
-                    .classList.remove("show");
-            }
-
-            document
-                .getElementById("sidebarToggle")
-                .addEventListener("click", () => {
-                    document.getElementById("sidebar").classList.toggle("open");
-                    document
-                        .getElementById("sidebarOverlay")
-                        .classList.toggle("show");
-                });
-
-            document
-                .getElementById("sidebarOverlay")
-                .addEventListener("click", closeSidebar);
-
-            // ===== Load & Render MD =====
-            async function loadDoc(path, label) {
-                const content = document.getElementById("mdContent");
-                content.innerHTML = '<div class="loading">加载中</div>';
-                document.getElementById("breadcrumbCurrent").textContent =
-                    label || path;
-                document.title = `${label || "Docs"} - Oozora`;
-
-                // Update URL hash
-                window.location.hash = encodeURIComponent(path);
-
-                try {
-                    const res = await fetch(path);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const md = await res.text();
-                    renderMarkdown(md);
-                } catch (err) {
-                    content.innerHTML = `<p style="color: var(--text-muted);">无法加载文档：<code>${path}</code><br><small>${err.message}</small></p>`;
-                }
-            }
-
-            function renderMarkdown(md) {
-                const content = document.getElementById("mdContent");
-
-                // Configure marked
-                marked.setOptions({
-                    gfm: true,
-                    breaks: false,
-                });
-
-                content.innerHTML = marked.parse(md);
-
-                // Make links open in new tab
-                content.querySelectorAll("a").forEach((a) => {
-                    if (a.href.startsWith("http")) {
-                        a.target = "_blank";
-                        a.rel = "noopener noreferrer";
-                    }
-                });
-
-                // Build TOC
-                buildToc(content);
-            }
-
-            // ===== TOC =====
-            function buildToc(container) {
-                const tocLinks = document.getElementById("tocLinks");
-                const headings = container.querySelectorAll("h2, h3, h4");
-                tocLinks.innerHTML = "";
-
-                headings.forEach((h, i) => {
-                    if (!h.id) h.id = `heading-${i}`;
-                    const a = document.createElement("a");
-                    a.className = "toc-link";
-                    a.href = `#${h.id}`;
-                    a.textContent = h.textContent;
-                    a.dataset.level = h.tagName.replace("H", "");
-                    tocLinks.appendChild(a);
-                });
-
-                // Highlight active on scroll
-                const observer = new IntersectionObserver(
-                    (entries) => {
-                        entries.forEach((entry) => {
-                            const link = tocLinks.querySelector(
-                                `a[href="#${entry.target.id}"]`,
-                            );
-                            if (link) {
-                                if (entry.isIntersecting) {
-                                    tocLinks
-                                        .querySelectorAll(".toc-link")
-                                        .forEach((l) =>
-                                            l.classList.remove("active"),
-                                        );
-                                    link.classList.add("active");
-                                }
-                            }
-                        });
-                    },
-                    { rootMargin: "-80px 0px -70% 0px", threshold: 0 },
-                );
-
-                headings.forEach((h) => observer.observe(h));
-            }
-
-            // ===== Init =====
-            renderSidebar();
-
-            // Load from hash or first doc
-            const hash = decodeURIComponent(window.location.hash.slice(1));
-            if (hash) {
-                const navItem = document.querySelector(
-                    `.nav-item[data-path="${hash}"]`,
-                );
-                if (navItem) {
-                    loadDoc(navItem.dataset.path, navItem.dataset.label);
-                    setActiveNav(navItem);
-                } else {
-                    loadDoc(
-                        DOC_GROUPS[0].files[0].path,
-                        DOC_GROUPS[0].files[0].label,
-                    );
-                    setActiveNav(document.querySelector(".nav-item"));
-                }
-            } else {
-                loadDoc(
-                    DOC_GROUPS[0].files[0].path,
-                    DOC_GROUPS[0].files[0].label,
-                );
-                setActiveNav(document.querySelector(".nav-item"));
-            }
-
-            // Hash change
-            window.addEventListener("hashchange", () => {
-                const h = decodeURIComponent(window.location.hash.slice(1));
-                const navItem = document.querySelector(
-                    `.nav-item[data-path="${h}"]`,
-                );
-                if (navItem) {
-                    loadDoc(navItem.dataset.path, navItem.dataset.label);
-                    setActiveNav(navItem);
-                }
-            });
+        <script type="module">
+            import { init } from "./index.js";
+            init();
         </script>
     </body>
 </html>

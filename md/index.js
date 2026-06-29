@@ -182,6 +182,9 @@ function renderMarkdown(md) {
 
     content.innerHTML = marked.parse(md);
 
+    // Render mermaid blocks
+    renderMermaid(content);
+
     // Handle links: external -> new tab, internal -> router navigation
     content.querySelectorAll("a").forEach((a) => {
         const href = a.getAttribute("href");
@@ -212,6 +215,36 @@ function renderMarkdown(md) {
 
     // Build TOC
     buildToc(content);
+}
+
+// ===== Mermaid =====
+async function renderMermaid(container) {
+    const codeBlocks = container.querySelectorAll("code.language-mermaid");
+    if (codeBlocks.length === 0) return;
+    if (typeof mermaid === "undefined") return;
+
+    // Init mermaid
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: "default",
+        securityLevel: "loose",
+    });
+
+    for (let i = 0; i < codeBlocks.length; i++) {
+        const code = codeBlocks[i];
+        const pre = code.parentElement;
+        const graphDef = code.textContent;
+
+        try {
+            const { svg } = await mermaid.render(`mermaid-${Date.now()}-${i}`, graphDef);
+            const div = document.createElement("div");
+            div.className = "mermaid-chart";
+            div.innerHTML = svg;
+            pre.replaceWith(div);
+        } catch (err) {
+            pre.outerHTML = `<div class="mermaid-error">Mermaid 渲染失败: ${err.message}</div>`;
+        }
+    }
 }
 
 // ===== TOC =====

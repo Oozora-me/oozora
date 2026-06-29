@@ -393,6 +393,26 @@
                 font-size: 0.875rem;
             }
 
+            .md-content .mermaid-chart {
+                background: #fafafa;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                text-align: center;
+                overflow-x: auto;
+            }
+
+            .md-content .mermaid-error {
+                background: #fff5f5;
+                border: 1px solid #feb2b2;
+                color: #c53030;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                font-size: 0.85rem;
+            }
+
             .md-content hr {
                 border: none;
                 height: 1px;
@@ -603,9 +623,9 @@
         </div>
 
         <script src="https://cdn.bootcdn.net/ajax/libs/marked/16.3.0/lib/marked.umd.min.js"></script>
-        <script type="module">
-            import { init } from "./index.js";
-            init();
+        <script src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"></script>
+        <script>
+            import("./index.js").then(({ init }) => init());
         </script>
     </body>
 </html>
